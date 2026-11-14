@@ -81,7 +81,10 @@ class SupabaseBackend {
 
   async rest(path, { method = 'GET', body, prefer, range } = {}, retry = true) {
     const token = await this.freshToken();
-    const headers = { apikey: this.key, Authorization: `Bearer ${token || this.key}`, 'Content-Type': 'application/json' };
+    // New sb_publishable_ keys are not JWTs, so only send Authorization when we have a user token.
+    const headers = { apikey: this.key, 'Content-Type': 'application/json' };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    else if (this.key.split('.').length === 3) headers.Authorization = `Bearer ${this.key}`;
     if (prefer) headers.Prefer = prefer;
     if (range) { headers['Range-Unit'] = 'items'; headers.Range = range; }
     const r = await fetch(`${this.url}/rest/v1/${path}`, { method, headers, body: body ? JSON.stringify(body) : undefined });
