@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { LuArrowRight, LuSparkles, LuPhoneCall, LuGraduationCap } from 'react-icons/lu';
 import { useStore } from '../store.jsx';
 import { Button, Field } from '../components/ui.jsx';
+import { ElevationPath } from '../components/motion.jsx';
 
 export default function Login() {
   const { signIn, signUp, resetPassword, live } = useStore();
@@ -29,10 +30,11 @@ export default function Login() {
     <div className="login">
       <section className="login-art">
         <div className="login-glow" />
-        <div className="login-brand"><img src="/logo.svg" alt="" width="52" height="52" /><div><b>The Elevation Church</b><span>Lekki</span></div></div>
+        <div className="login-brand"><img src="/logo-light.png" alt="The Elevation Church, Greater Lekki" /></div>
         <div className="login-copy">
           <p className="eyebrow">Guest Journey</p>
           <h1 className="serif">Every first-timer, known by name and followed with care.</h1>
+          <div className="login-path"><ElevationPath counts={null} compact /></div>
           <ul>
             <li><LuPhoneCall aria-hidden /> Every new guest called by Wednesday</li>
             <li><LuGraduationCap aria-hidden /> Track each step from first visit to Greatness Community</li>
@@ -44,6 +46,7 @@ export default function Login() {
 
       <section className="login-form">
         <form onSubmit={submit} className="login-card">
+          <img src="/emblem-dark.png" alt="" className="login-emblem" />
           <h2 className="serif">{!live ? 'Explore the demo' : mode === 'in' ? 'Welcome back' : mode === 'up' ? 'Create your account' : 'Reset password'}</h2>
           <p className="muted">{!live ? 'Supabase isn’t connected yet, so you’ll see realistic sample data. Nothing is saved to a server.' : mode === 'up' ? 'New team members sign up here; an admin then assigns your role.' : 'Sign in with your church team account.'}</p>
           {live && mode === 'up' && <Field label="Full name" required><input value={f.name} onChange={set('name')} required autoComplete="name" /></Field>}

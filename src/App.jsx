@@ -60,7 +60,7 @@ export default function App() {
   if (!data) {
     return (
       <div className="boot">
-        {error ? <><p>{error}</p><Button onClick={store.reload}>Try again</Button><Button variant="ghost" onClick={store.signOut}>Sign out</Button></> : <><span className="spinner" /><p>Loading the guest journey…</p></>}
+        {error ? <><p>{error}</p><Button onClick={store.reload}>Try again</Button><Button variant="ghost" onClick={store.signOut}>Sign out</Button></> : <><img src="/emblem-dark.png" alt="" width="64" height="66" className="boot-emblem" /><p>Loading the guest journey…</p></>}
       </div>
     );
   }
@@ -68,7 +68,7 @@ export default function App() {
   if (me.role === 'pending' || me.active === false) {
     return (
       <div className="boot">
-        <img src="/logo.svg" alt="" width="64" height="64" />
+        <img src="/emblem-dark.png" alt="" width="72" height="74" />
         <h2 className="serif">Welcome, {me.full_name || me.email}</h2>
         <p className="muted" style={{ maxWidth: 420 }}>{me.active === false ? 'Your access has been switched off.' : 'Your account is waiting for an admin to approve it and assign your role. Please check back shortly.'}</p>
         <Button onClick={store.signOut} icon={LuLogOut}>Sign out</Button>
@@ -84,8 +84,8 @@ export default function App() {
     <div className={cls('shell', menu && 'menu-open')}>
       <aside className="side">
         <div className="side-brand">
-          <img src="/logo.svg" alt="" width="40" height="40" />
-          <div><b>The Elevation Church</b><span>Lekki · Guest Journey</span></div>
+          <img src="/logo-light.png" alt="The Elevation Church, Greater Lekki" className="side-logo" />
+          <span className="side-app">Guest Journey</span>
         </div>
         <nav className="side-nav">
           {NAV.filter((n) => !n.perm || can(me, n.perm)).map((n) => (

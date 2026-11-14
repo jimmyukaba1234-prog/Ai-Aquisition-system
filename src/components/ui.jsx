@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTilt, CountUp } from './motion.jsx';
 import { LuX, LuArrowUpRight, LuArrowDownRight } from 'react-icons/lu';
 import { cls, initials } from '../lib/format.js';
 import { STAGES, stageIndex, followupStatus, daysOverdue, followupDue, parseDay } from '../lib/journey.js';
@@ -25,13 +26,15 @@ export const Card = ({ title, sub, right, children, className, pad = true }) => 
 
 export function Stat({ label, value, sub, delta, tone, icon: Icon, onClick }) {
   const up = delta > 0, down = delta < 0;
+  const tilt = useTilt(8);
+  const n = typeof value === 'number' ? value : null;
   return (
-    <button type="button" className={cls('stat', tone && `stat-${tone}`, onClick && 'stat-click')} onClick={onClick} disabled={!onClick}>
+    <button ref={tilt} type="button" className={cls('stat', 'tilt', tone && `stat-${tone}`, onClick && 'stat-click')} onClick={onClick} disabled={!onClick}>
       <div className="stat-top">
         <span className="stat-l">{label}</span>
         {Icon && <span className="stat-ic"><Icon aria-hidden /></span>}
       </div>
-      <div className="stat-v">{value}</div>
+      <div className="stat-v">{n !== null ? <CountUp value={n} /> : value}</div>
       <div className="stat-s">
         {delta !== undefined && delta !== null && (
           <span className={cls('delta', up && 'up', down && 'down')}>

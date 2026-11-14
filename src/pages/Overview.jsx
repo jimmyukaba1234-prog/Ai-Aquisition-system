@@ -7,6 +7,7 @@ import { useStore } from '../store.jsx';
 import { go } from '../App.jsx';
 import { Card, Stat, Segmented, Avatar, StageDots, FollowBadge } from '../components/ui.jsx';
 import { WeeklyBars, Funnel, HBars, Ring } from '../components/charts.jsx';
+import { ElevationPath, CountUp, useTilt } from '../components/motion.jsx';
 import { fetchDigest } from '../lib/ai.js';
 import {
   STAGES, PERIODS, periodRange, previousRange, inRange, today, addDays, weekStart, followupStatus, dayOf, fullName, parseDay,
@@ -78,11 +79,10 @@ export default function Overview({ openGuest }) {
 
   return (
     <div className="ov">
+      <Hero me={me} guests={guests} settings={settings} overdue={m.overdueNow.length} />
+
       <div className="ov-head">
-        <div>
-          <p className="eyebrow">{fmtDateLong(today())}</p>
-          <h2 className="serif ov-hello">{greeting()}, {(me.full_name || '').split(' ')[0] || 'friend'}.</h2>
-        </div>
+        <div><p className="eyebrow">Insights</p><h2 className="serif ov-title">How our guests are doing</h2></div>
         <Segmented value={period} onChange={setPeriod} options={PERIOD_OPTS} />
       </div>
 
@@ -112,12 +112,12 @@ export default function Overview({ openGuest }) {
       </section>
 
       <div className="stats">
-        <Stat label={`New guests · ${periodLabel}`} value={fmtNum(m.cohort.length)} delta={delta} sub={m.prevCohort ? (['this_week','this_month','this_year'].includes(period) ? 'vs same point last ' + period.split('_')[1] : 'vs the period before') : 'first-time guests'} icon={LuUsers} onClick={() => go('guests', { period })} />
+        <Stat label={`New guests · ${periodLabel}`} value={m.cohort.length} delta={delta} sub={m.prevCohort ? (['this_week','this_month','this_year'].includes(period) ? 'vs same point last ' + period.split('_')[1] : 'vs the period before') : 'first-time guests'} icon={LuUsers} onClick={() => go('guests', { period })} />
         <Stat label="Reached so far" value={`${m.reachedPct}%`} sub={`${m.reachable.filter((g) => g.followed_up_at).length} of ${m.reachable.length} whose call window has closed`} icon={LuCircleCheck} tone={m.reachedPct >= 80 ? 'good' : m.reachedPct < 60 ? 'warn' : ''} />
-        <Stat label="Overdue follow-ups" value={fmtNum(m.overdueNow.length)} sub="right now, last 60 days" icon={LuTriangleAlert} tone={m.overdueNow.length ? 'bad' : 'good'} onClick={() => go('followups', { tab: 'overdue' })} />
-        <Stat label="Started Greatness Track" value={fmtNum(m.gtStarted)} sub={periodLabel} icon={LuGraduationCap} onClick={() => go('guests', { stage: 'gt_started' })} />
-        <Stat label="Joined a department" value={fmtNum(m.deptJoined)} sub={periodLabel} icon={LuBuilding2} onClick={() => go('guests', { stage: 'department' })} />
-        <Stat label="Greatness Community" value={fmtNum(m.community)} sub={`joined ${periodLabel}`} icon={LuUsersRound} onClick={() => go('guests', { stage: 'community' })} />
+        <Stat label="Overdue follow-ups" value={m.overdueNow.length} sub="right now, last 60 days" icon={LuTriangleAlert} tone={m.overdueNow.length ? 'bad' : 'good'} onClick={() => go('followups', { tab: 'overdue' })} />
+        <Stat label="Started Greatness Track" value={m.gtStarted} sub={periodLabel} icon={LuGraduationCap} onClick={() => go('guests', { stage: 'gt_started' })} />
+        <Stat label="Joined a department" value={m.deptJoined} sub={periodLabel} icon={LuBuilding2} onClick={() => go('guests', { stage: 'department' })} />
+        <Stat label="Greatness Community" value={m.community} sub={`joined ${periodLabel}`} icon={LuUsersRound} onClick={() => go('guests', { stage: 'community' })} />
       </div>
 
       <div className="grid-2-1">
@@ -171,5 +171,35 @@ export default function Overview({ openGuest }) {
       </div>
       <p className="foot muted small"><LuHeartHandshake aria-hidden /> Built for The Elevation Church, Lekki · “Every guest known by name.”</p>
     </div>
+  );
+}
+
+function Hero({ me, guests, settings, overdue }) {
+  const tilt = useTilt(4);
+  const counts = STAGES.map((st) => (st.key === 'new' ? guests.length : guests.filter((g) => g[st.field]).length));
+  const wk = periodRange('this_week');
+  const thisWeek = guests.filter((g) => inRange(g.first_visit, wk)).length;
+  return (
+    <section className="hero" ref={tilt}>
+      <div className="hero-bg" aria-hidden>
+        <span className="orb o1" /><span className="orb o2" /><span className="ring r1" /><span className="ring r2" /><span className="hero-light" />
+      </div>
+      <div className="hero-in">
+        <div className="hero-copy">
+          <img src="/logo-light.png" alt="The Elevation Church, Greater Lekki" className="hero-logo" />
+          <p className="eyebrow">{fmtDateLong(today())}</p>
+          <h2 className="serif hero-h">{greeting()}, {(me.full_name || '').split(' ')[0] || 'friend'}.</h2>
+          <p className="hero-sub">Every first-timer is a story God is writing. This is where our <b><CountUp value={guests.length} /></b> guests are on their journey, from first Sunday to the Greatness Community.</p>
+          <div className="hero-chips">
+            <button onClick={() => go('guests', { period: 'this_week' })}><b><CountUp value={thisWeek} /></b> new this week</button>
+            <button className={overdue ? 'hot' : ''} onClick={() => go('followups', { tab: 'overdue' })}><b><CountUp value={overdue} /></b> awaiting a call</button>
+          </div>
+        </div>
+        <div className="hero-path">
+          <p className="hero-path-t">The Elevation Path</p>
+          <ElevationPath counts={counts} />
+        </div>
+      </div>
+    </section>
   );
 }
