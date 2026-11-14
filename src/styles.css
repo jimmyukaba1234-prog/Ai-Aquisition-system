@@ -548,7 +548,7 @@ body { background: radial-gradient(1200px 600px at 100% -10%, #EFE8D6 0%, transp
   background: #0A1630;
   box-shadow: 0 1px 0 rgba(255,255,255,.12) inset, 0 40px 80px -40px rgba(7,15,36,.85), 0 14px 28px -14px rgba(7,15,36,.55);
   transform: perspective(1600px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform .6s cubic-bezier(.2,.8,.2,1); }
-.welcome-photo { position: absolute; z-index: -2; top: 0; bottom: 0; right: 0; width: 66%; background: url('/welcome.jpg') center 30% / cover no-repeat;
+.welcome-photo { position: absolute; z-index: -2; top: 0; bottom: 0; right: 0; width: 66%; background: url('https://images.unsplash.com/photo-1614317354806-860a3bf79069?w=2000&q=82&auto=format&fit=crop') center 38% / cover no-repeat;
   animation: kenburns 22s ease-in-out infinite alternate; transform-origin: 60% 40%; }
 .welcome-shade { position: absolute; inset: 0; z-index: -1;
   background:
@@ -577,8 +577,8 @@ body { background: radial-gradient(1200px 600px at 100% -10%, #EFE8D6 0%, transp
 
 .login-art { background: #0A1630; isolation: isolate; }
 .login-photo { position: absolute; inset: 0; z-index: -1; background:
-    linear-gradient(180deg, rgba(10,22,48,.55) 0%, rgba(10,22,48,.35) 40%, rgba(10,22,48,.92) 72%, #0A1630 100%),
-    url('/welcome.jpg') center 22% / cover no-repeat; animation: kenburns 26s ease-in-out infinite alternate; }
+    linear-gradient(180deg, #0A1630 0%, rgba(10,22,48,.75) 11%, rgba(10,22,48,.05) 24%, rgba(10,22,48,0) 46%, rgba(10,22,48,.9) 70%, #0A1630 86%),
+    url('https://images.unsplash.com/photo-1614317354806-860a3bf79069?w=2000&q=82&auto=format&fit=crop') 38% 0 / cover no-repeat; animation: kenburns 26s ease-in-out infinite alternate; }
 .login-copy h1 em { font-style: normal; color: var(--gold-300); }
 .login-copy h1 { margin-bottom: 12px; }
 .login-lead { margin: 0 0 24px; color: #C9D2E6; font-size: 15.5px; line-height: 1.6; max-width: 460px; }
@@ -587,3 +587,18 @@ body { background: radial-gradient(1200px 600px at 100% -10%, #EFE8D6 0%, transp
 @media (max-width: 1100px) { .welcome-photo { width: 100%; opacity: .55; } .welcome-shade { background: linear-gradient(90deg, rgba(10,22,48,.95) 0%, rgba(10,22,48,.7) 60%, rgba(10,22,48,.35) 100%); } }
 @media (max-width: 900px) { .welcome { min-height: 0; } .welcome-copy { padding: 28px 22px; } .welcome-sub { font-size: 19px; } .login-copy { margin-top: 30px; } }
 @media (hover: none) { .tilt, .welcome { transform: none !important; } }
+
+/* Team-facing copy & cleaner layout (v3) */
+.login-art { padding: 36px 52px 52px; }
+.login-brand img { width: 150px; }
+.login-copy { margin: auto 0 0; max-width: 480px; }
+.login-copy .eyebrow { margin-bottom: 12px; }
+.login-copy h1 { font-size: clamp(32px, 3.3vw, 46px); line-height: 1.08; margin-bottom: 14px; }
+.login-copy h1 em { display: block; }
+.login-lead { margin: 0; font-size: 16px; max-width: 400px; }
+.login-photo { animation-duration: 34s; transform-origin: 40% 0; }
+.welcome-h { margin-bottom: 14px; }
+.welcome-body { font-size: 16px; color: #DCE2EF; margin-bottom: 26px; max-width: 440px; }
+.welcome-body b { color: #F3D98E; font-weight: 800; }
+.welcome-copy { max-width: 520px; }
+@media (max-width: 900px) { .login-art { padding: 26px 24px 30px; min-height: 380px; } .login-brand img { width: 128px; } }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LuArrowRight, LuSparkles, LuPhoneCall, LuGraduationCap } from 'react-icons/lu';
+import { LuArrowRight } from 'react-icons/lu';
 import { useStore } from '../store.jsx';
 import { Button, Field } from '../components/ui.jsx';
 
@@ -31,16 +31,10 @@ export default function Login() {
         <div className="login-photo" aria-hidden />
         <div className="login-brand"><img src="/logo-light.png" alt="The Elevation Church, Greater Lekki" /></div>
         <div className="login-copy">
-          <p className="eyebrow">Guest Journey</p>
-          <h1 className="serif">We’re so glad <em>you’re here.</em></h1>
-          <p className="login-lead">Every first-timer, known by name and followed with care, from their first Sunday to the Greatness Community.</p>
-          <ul>
-            <li><LuPhoneCall aria-hidden /> Every new guest called by Wednesday</li>
-            <li><LuGraduationCap aria-hidden /> Track each step from first visit to Greatness Community</li>
-            <li><LuSparkles aria-hidden /> AI tells the team who needs attention today</li>
-          </ul>
+          <p className="eyebrow">Guest Journey · Team portal</p>
+          <h1 className="serif">Every guest, <em>followed with care.</em></h1>
+          <p className="login-lead">See who to call, who’s growing, and who needs attention this week.</p>
         </div>
-        <p className="login-verse">“And let us consider one another to provoke unto love and to good works.” <span>Hebrews 10:24</span></p>
       </section>
 
       <section className="login-form">

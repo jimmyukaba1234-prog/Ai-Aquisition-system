@@ -79,7 +79,7 @@ export default function Overview({ openGuest }) {
 
   return (
     <div className="ov">
-      <Hero me={me} guests={guests} />
+      <Hero me={me} guests={guests} settings={data.settings} />
 
       <div className="ov-head">
         <div><p className="eyebrow">Insights</p><h2 className="serif ov-title">How our guests are doing</h2></div>
@@ -174,22 +174,24 @@ export default function Overview({ openGuest }) {
   );
 }
 
-function Hero({ me, guests }) {
+function Hero({ me, guests, settings }) {
   const tilt = useTilt(3);
   const wk = periodRange('this_week');
   const thisWeek = guests.filter((g) => inRange(g.first_visit, wk)).length;
+  const overdue = guests.filter((g) => g.first_visit >= addDays(today(), -60) && followupStatus(g, settings) === 'overdue').length;
   return (
     <section className="welcome" ref={tilt}>
-      <div className="welcome-photo" role="img" aria-label="Elevation Church welcome team greeting a first-time guest" />
+      <div className="welcome-photo" role="img" aria-label="Church team members smiling together at the church entrance" />
       <div className="welcome-shade" aria-hidden />
       <div className="welcome-copy">
         <p className="welcome-hi">{greeting()}, {(me.full_name || '').split(' ')[0] || 'friend'} · {fmtDateLong(today())}</p>
-        <h2 className="welcome-h"><span>Welcome to</span>The Elevation <em>Church</em></h2>
-        <p className="welcome-sub">We’re so glad you’re here!</p>
-        <p className="welcome-body">Whether it’s your first time or you’ve been with us before, you belong here. Let’s grow together in God’s grace.</p>
+        <h2 className="welcome-h">Every guest,<br /><em>known by name.</em></h2>
+        <p className="welcome-body">
+          {overdue > 0 ? <><b>{overdue}</b> {overdue === 1 ? 'guest is' : 'guests are'} waiting for a call. Let’s reach them today.</> : 'Every guest has been called. Great work, team.'}
+        </p>
         <div className="welcome-cta">
-          <button className="btn-gold" onClick={() => go('guests', { period: 'this_week' })}>Welcome, Friend! <LuArrowRight aria-hidden /></button>
-          <button className="welcome-chip" onClick={() => go('guests', { period: 'this_week' })}><b><CountUp value={thisWeek} /></b> first-timers this week</button>
+          <button className="btn-gold" onClick={() => go('followups', { tab: overdue ? 'overdue' : 'due' })}>Start follow-ups <LuArrowRight aria-hidden /></button>
+          <button className="welcome-chip" onClick={() => go('guests', { period: 'this_week' })}><b><CountUp value={thisWeek} /></b> new this week</button>
         </div>
       </div>
     </section>
