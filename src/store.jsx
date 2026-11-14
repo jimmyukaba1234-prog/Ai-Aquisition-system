@@ -21,6 +21,8 @@ export function StoreProvider({ children }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
   const [toasts, setToasts] = useState([]);
+  const [authEvent, setAuthEvent] = useState(backend.authEvent);
+  const authMessage = backend.authMessage;
 
   const toast = useCallback((msg, tone = 'ok') => {
     const id = Math.random().toString(36).slice(2);
@@ -49,6 +51,8 @@ export function StoreProvider({ children }) {
     async signIn(email, pw) { await backend.signIn(email, pw); setSignedIn(true); },
     async signUp(email, pw, name) { const r = await backend.signUp(email, pw, name); if (backend.hasSession()) setSignedIn(true); return r; },
     resetPassword: (email) => backend.resetPassword(email),
+    updatePassword: (pw) => run(async () => { await backend.updatePassword(pw); setAuthEvent(null); }, 'Password updated'),
+    dismissAuthEvent: () => setAuthEvent(null),
     async signOut() { await backend.signOut(); setSignedIn(false); },
     reload,
     updateGuest: (id, patch, msg) => run(async () => { const g = await backend.updateGuest(id, patch); patchGuest(g); return g; }, msg),
@@ -75,6 +79,6 @@ export function StoreProvider({ children }) {
     clearDemo: () => run(async () => { await backend.clearDemo(); await reload(); }, 'Sample data cleared'),
   }), [reload, run, data?.me]);
 
-  const value = { signedIn, data, error, toast, toasts, live: backend.live, ...actions };
+  const value = { signedIn, authEvent, authMessage, data, error, toast, toasts, live: backend.live, ...actions };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

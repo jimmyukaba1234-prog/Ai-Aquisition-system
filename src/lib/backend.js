@@ -29,6 +29,44 @@ class SupabaseBackend {
     this.url = url.replace(/\/$/, '');
     this.key = key;
     this.session = store.get('ecl-session');
+    this.authEvent = null; // 'signup' | 'recovery' | 'magiclink' | 'error'
+    this.authMessage = '';
+    this.readAuthLink();
+  }
+
+  // Supabase email links come back as #access_token=…&type=signup (or #error=…). Take the session from it.
+  readAuthLink() {
+    if (typeof location === 'undefined') return;
+    const raw = location.hash.replace(/^#\/?/, '');
+    if (!/(^|&)(access_token|error)=/.test(raw)) return;
+    const p = new URLSearchParams(raw);
+    if (p.get('error')) {
+      this.authEvent = 'error';
+      this.authMessage = /expired|invalid/i.test(p.get('error_description') || p.get('error_code') || '')
+        ? 'That email link has expired or was already used. Sign in, or request a new link.'
+        : (p.get('error_description') || 'That email link could not be used.').replace(/\+/g, ' ');
+    } else {
+      const access_token = p.get('access_token');
+      let user = null;
+      try {
+        const b = access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        const c = JSON.parse(decodeURIComponent(escape(atob(b + '==='.slice((b.length + 3) % 4)))));
+        user = { id: c.sub, email: c.email, user_metadata: c.user_metadata || {} };
+      } catch { /* keep null */ }
+      if (user?.id) {
+        this.saveSession({ access_token, refresh_token: p.get('refresh_token'), expires_in: Number(p.get('expires_in')) || 3600, expires_at: Number(p.get('expires_at')) || undefined, token_type: 'bearer', user });
+        this.authEvent = p.get('type') || 'signup';
+      }
+    }
+    try { history.replaceState(null, '', location.pathname + location.search + '#/'); } catch { location.hash = '#/'; }
+  }
+  redirectTo() { return typeof location === 'undefined' ? '' : '?redirect_to=' + encodeURIComponent(location.origin + '/'); }
+  async updatePassword(password) {
+    const token = await this.freshToken();
+    const r = await fetch(this.url + '/auth/v1/user', { method: 'PUT', headers: { apikey: this.key, Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ password }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.msg || j.message || j.error_description || 'Could not update password');
+    return j;
   }
 
   get token() { return this.session?.access_token; }
@@ -53,12 +91,12 @@ class SupabaseBackend {
     return this.session.user;
   }
   async signUp(email, password, full_name) {
-    const j = await this.authFetch('/auth/v1/signup', { email, password, data: { full_name } });
+    const j = await this.authFetch('/auth/v1/signup' + this.redirectTo(), { email, password, data: { full_name } });
     if (j.access_token) this.saveSession(j);
     return j;
   }
   async resetPassword(email) {
-    return this.authFetch('/auth/v1/recover', { email });
+    return this.authFetch('/auth/v1/recover' + this.redirectTo(), { email });
   }
   async signOut() {
     try {
@@ -185,6 +223,7 @@ class DemoBackend {
   async signIn() { this.signedIn = true; store.set('ecl-demo-signed-in', true); return this.state.me; }
   async signUp() { return this.signIn(); }
   async resetPassword() { return {}; }
+  async updatePassword() { return {}; }
   async signOut() { this.signedIn = false; store.del('ecl-demo-signed-in'); }
   async loadAll() {
     const s = this.state;

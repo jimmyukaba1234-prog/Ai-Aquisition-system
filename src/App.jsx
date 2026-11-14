@@ -3,7 +3,7 @@ import {
   LuLayoutDashboard, LuUsers, LuPhoneCall, LuCloudUpload, LuUserCog, LuSettings, LuLogOut, LuMenu, LuSearch, LuUserPlus, LuClock,
 } from 'react-icons/lu';
 import { useStore, can, ROLE_LABEL } from './store.jsx';
-import { Avatar, Button, Toasts } from './components/ui.jsx';
+import { Avatar, Button, Toasts, Modal, Field } from './components/ui.jsx';
 import { cls } from './lib/format.js';
 import { followupStatus } from './lib/journey.js';
 import Login from './pages/Login.jsx';
@@ -43,6 +43,10 @@ const NAV = [
 const TITLES = { overview: 'Overview', guests: 'Guests', followups: 'Follow-ups', upload: 'Upload guest cards', team: 'Team', settings: 'Settings' };
 
 export default function App() {
+  return <><AppInner /><AuthLinkGate /></>;
+}
+
+function AppInner() {
   const store = useStore();
   const { signedIn, data, error, toasts, live } = store;
   const route = useRoute();
@@ -125,3 +129,36 @@ export default function App() {
 }
 
 function isoDaysAgo(n) { const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().slice(0, 10); }
+
+// Handles the moment someone arrives from a Supabase email link.
+function AuthLinkGate() {
+  const { signedIn, authEvent, updatePassword, dismissAuthEvent, toast } = useStore();
+  const [pw, setPw] = useState({ a: '', b: '' });
+  const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    if (signedIn && (authEvent === 'signup' || authEvent === 'magiclink' || authEvent === 'invite')) {
+      toast('Email confirmed. Welcome!');
+      dismissAuthEvent();
+    }
+  }, [signedIn, authEvent, toast, dismissAuthEvent]);
+  if (!signedIn || authEvent !== 'recovery') return null;
+  async function save(e) {
+    e.preventDefault();
+    if (pw.a.length < 6) return setErr('Use at least 6 characters.');
+    if (pw.a !== pw.b) return setErr('The two passwords do not match.');
+    setBusy(true); setErr('');
+    try { await updatePassword(pw.a); } catch (x) { setErr(x.message); }
+    setBusy(false);
+  }
+  return (
+    <Modal open onClose={dismissAuthEvent} title="Set a new password" width={440}
+      footer={<><Button variant="ghost" onClick={dismissAuthEvent}>Later</Button><Button type="submit" form="set-pw" disabled={busy}>Save password</Button></>}>
+      <form id="set-pw" onSubmit={save} style={{ display: "grid", gap: 14 }}>
+        <Field label="New password"><input type="password" autoComplete="new-password" value={pw.a} onChange={(e) => setPw({ ...pw, a: e.target.value })} autoFocus /></Field>
+        <Field label="Type it again"><input type="password" autoComplete="new-password" value={pw.b} onChange={(e) => setPw({ ...pw, b: e.target.value })} /></Field>
+        {err && <div className="note note-bad">{err}</div>}
+      </form>
+    </Modal>
+  );
+}

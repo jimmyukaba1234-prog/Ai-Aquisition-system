@@ -4,11 +4,11 @@ import { useStore } from '../store.jsx';
 import { Button, Field } from '../components/ui.jsx';
 
 export default function Login() {
-  const { signIn, signUp, resetPassword, live } = useStore();
+  const { signIn, signUp, resetPassword, live, authEvent, authMessage } = useStore();
   const [mode, setMode] = useState('in');
   const [f, setF] = useState({ name: '', email: '', pw: '' });
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState(null);
+  const [msg, setMsg] = useState(authEvent === 'error' ? { tone: 'bad', text: authMessage } : null);
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
 
   async function submit(e) {
