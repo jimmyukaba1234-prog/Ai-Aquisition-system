@@ -48,23 +48,31 @@ export default async function handler(req, res) {
   if (!data || JSON.stringify(data).length > 40000) return res.status(400).json({ error: 'Invalid request' });
   const prompt = mode === 'guest' ? guestPrompt(data) : digestPrompt(data);
 
+  // If the main model hits its free daily limit (429), fall back to a lighter model with a bigger allowance.
+  const models = [...new Set([model, process.env.GROQ_FALLBACK_MODEL || 'llama-3.1-8b-instant'])];
   try {
-    const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model,
-        temperature: 0.4,
-        max_tokens: 900,
-        response_format: { type: 'json_object' },
-        messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: prompt }],
-      }),
-    });
-    const j = await r.json();
-    if (!r.ok) return res.status(502).json({ error: j?.error?.message || 'Groq request failed' });
+    let j, used, lastErr;
+    for (const m of models) {
+      const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: m,
+          temperature: 0.4,
+          max_tokens: 900,
+          response_format: { type: 'json_object' },
+          messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: prompt }],
+        }),
+      });
+      j = await r.json();
+      if (r.ok) { used = m; break; }
+      lastErr = j?.error?.message || 'Groq request failed';
+      if (r.status !== 429) break;
+    }
+    if (!used) return res.status(502).json({ error: lastErr });
     const out = JSON.parse(j.choices?.[0]?.message?.content || '{}');
     res.setHeader('Cache-Control', 'no-store');
-    return res.status(200).json({ ...out, model, source: 'groq' });
+    return res.status(200).json({ ...out, model: used, source: 'groq' });
   } catch (e) {
     return res.status(502).json({ error: 'AI is unavailable right now' });
   }
