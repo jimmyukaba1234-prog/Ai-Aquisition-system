@@ -1,0 +1,23 @@
+{
+  "name": "elevation-guest-journey",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Elevation Church Lekki: newcomer tracking, follow-up and discipleship journey, with AI insights.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/build.mjs --watch"
+  },
+  "dependencies": {
+    "jszip": "^3.10.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-icons": "^5.5.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

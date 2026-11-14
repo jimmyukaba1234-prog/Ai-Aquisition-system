@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="The Elevation Church">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#E7C977"/><stop offset="1" stop-color="#B8892E"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="30" fill="#0B1B3A"/>
+  <circle cx="32" cy="32" r="26" fill="none" stroke="url(#g)" stroke-width="2.5"/>
+  <path d="M18 42 L32 18 L46 42" fill="none" stroke="url(#g)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M24 42 L32 29 L40 42" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+</svg>
