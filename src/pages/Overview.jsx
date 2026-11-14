@@ -89,7 +89,7 @@ export default function Overview({ openGuest }) {
       <section className="ai">
         <div className="ai-glow" />
         <header className="ai-h">
-          <div className="ai-title"><span className="ai-badge"><LuSparkles aria-hidden /></span><div><b>Elevation AI · Today’s briefing</b><span>{brief ? (brief.source === 'groq' ? `Groq · ${brief.model || 'Llama'} · updated ${timeAgo(brief.generated_at)}` : `Smart rules · updated ${timeAgo(brief.generated_at)}`) : 'Reading today’s data…'}</span></div></div>
+          <div className="ai-title"><span className="ai-badge"><LuSparkles aria-hidden /></span><div><b>Elevation AI · Today’s briefing</b><span>{brief ? `Updated ${timeAgo(brief.generated_at)}` : 'Reading today’s data…'}</span></div></div>
           <button className="ai-refresh" onClick={() => loadBrief(true)} disabled={loadingAi} aria-label="Refresh briefing"><LuRefreshCw className={loadingAi ? 'spin' : ''} /> Refresh</button>
         </header>
         {brief ? (

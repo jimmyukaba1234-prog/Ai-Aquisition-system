@@ -63,9 +63,7 @@ export default function Settings() {
           )}
         </Card>
         <Card title="AI assistant" right={<LuSparkles aria-hidden className="muted" />}>
-          <p className="muted">{live
-            ? 'The daily briefing and talking points use Groq’s free tier (Llama 3.3) through a secure server function. If Groq isn’t configured or is busy, the app falls back to built-in rules automatically.'
-            : 'In demo mode the briefing uses built-in rules. Once deployed with a GROQ_API_KEY, Groq’s free Llama model writes it.'}</p>
+          <p className="muted">The daily briefing, recommendations and call talking points are all written by AI.</p>
           <p className="muted small">Privacy: only first names, journey stages and card answers like occupation and interests are sent. Phone numbers, emails and prayer requests never leave your database.</p>
         </Card>
       </div>
