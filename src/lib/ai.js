@@ -3,7 +3,7 @@
 import { backend } from './backend.js';
 import {
   today, addDays, inRange, periodRange, previousRange, followupStatus, daysOverdue, isStalled, readyForGT,
-  firstName, fullName, stageOf, daysBetween, dayOf,
+  firstName, fullName, stageOf, journeyLabel, daysBetween, dayOf,
 } from './journey.js';
 import { pct } from './format.js';
 
@@ -37,6 +37,10 @@ export function digestData({ guests, followups, profiles, settings, me }) {
     overdue_top: recentOverdue.slice(0, 8).map(brief),
     due_by_deadline_count: due.length,
     callbacks_due_count: callbacks.length,
+    stopped_after_welcome_call_last_90_days: {
+      just_visiting: guests.filter((g) => g.pathway === 'visitor' && daysBetween(g.first_visit, t) <= 90).length,
+      not_ready_yet: guests.filter((g) => g.pathway === 'not_ready' && daysBetween(g.first_visit, t) <= 90).length,
+    },
     said_yes_but_not_reached: yesNotCalled.slice(0, 6).map((g) => firstName(g)),
     said_yes_but_not_reached_count: yesNotCalled.length,
     stalled_greatness_track_count: stalled.length,
@@ -102,7 +106,7 @@ function guestData(g, { followups, settings }) {
   return {
     first_name: firstName(g), gender: g.gender, age_range: g.age_range, marital_status: g.marital_status,
     occupation: g.occupation, sector: g.sector, interests: g.interests, needs: g.needs, would_join: g.would_join,
-    heard_via: g.heard_via, stage: stageOf(g).label, days_since_first_visit: daysBetween(g.first_visit, today()),
+    heard_via: g.heard_via, stage: journeyLabel(g), days_since_first_visit: daysBetween(g.first_visit, today()),
     visit_count: g.visit_count, previous_attempts: fs.map((f) => f.outcome), last_note: fs[0]?.notes || '',
     departments: (settings.departments || []).join(', '),
   };
@@ -120,7 +124,9 @@ export function rulesTalkingPoints(g, state) {
   else if (d.occupation === 'Student') points.push('They are a student. Mention the young people and campus fellowship activities.');
   if (d.would_join === 'Maybe') points.push('They said "Maybe" to joining. Ask what would help them decide; no pressure.');
   const stage = stageOf(g).key;
-  const next = stage === 'new' ? 'Reach them, then invite them to the next Greatness Track class.'
+  const next = g.pathway === 'visitor' ? 'Thank them for visiting and let them know they are always welcome back.'
+    : g.pathway === 'not_ready' ? 'Keep in touch gently. Invite them to a service or event, with no pressure to start Greatness Track.'
+    : stage === 'new' ? 'Reach them, then invite them to the next Greatness Track class.'
     : stage === 'followed_up' ? 'Invite them to start Greatness Track this month.'
     : stage === 'gt_started' ? 'Encourage them to finish Greatness Track.'
     : stage === 'gt_completed' ? 'Help them pick and join a department.'

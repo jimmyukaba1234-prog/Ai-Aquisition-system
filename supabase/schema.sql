@@ -77,6 +77,8 @@ create table if not exists public.guests (
   department            text,
   department_joined_at  date,
   community_joined_at   date,
+  pathway               text check (pathway in ('visitor', 'not_ready')),  -- stopped after the welcome call by choice
+  pathway_at            timestamptz,
   notes                 text,
   upload_id             uuid references public.uploads (id) on delete set null,
   is_demo               boolean not null default false,
@@ -84,6 +86,10 @@ create table if not exists public.guests (
   created_at            timestamptz not null default now(),
   updated_at            timestamptz not null default now()
 );
+-- for databases created before the pathway option existed
+alter table public.guests add column if not exists pathway text check (pathway in ('visitor', 'not_ready'));
+alter table public.guests add column if not exists pathway_at timestamptz;
+
 create index if not exists guests_first_visit_idx on public.guests (first_visit desc);
 create index if not exists guests_phone_idx on public.guests (phone);
 create index if not exists guests_assigned_idx on public.guests (assigned_to);

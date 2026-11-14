@@ -77,7 +77,7 @@ export function makeDemoData({ meId, teamIds } = {}) {
         would_join: weighted([['Yes', 58], ['Maybe', 34], ['No', 8]]),
         prayer_request: pick(PRAYERS), needs: pick(NEEDS), heard_via: [weighted(HEARD)],
         assigned_to: assigned, followed_up_at: null, gt_started_at: null, gt_completed_at: null,
-        department: null, department_joined_at: null, community_joined_at: null, notes: '',
+        department: null, department_joined_at: null, community_joined_at: null, pathway: null, pathway_at: null, notes: '',
         upload_id: w >= 18 ? uploadId : null, is_demo: true, created_at: at(addDays(sunday, 1), 10), updated_at: at(addDays(sunday, 1), 10),
       };
       if (g.age_range === '15-20' || g.sector === 'Student') { g.occupation = 'Student'; g.sector = 'Student'; }
@@ -106,6 +106,10 @@ export function makeDemoData({ meId, teamIds } = {}) {
           if (g.gt_completed_at && chance(0.72)) {
             g.department_joined_at = clampDay(addDays(g.gt_completed_at, 5 + Math.floor(r() * 18)));
             if (g.department_joined_at) g.department = pick(DEPARTMENTS);
+          }
+          if (!g.gt_started_at && daysBetween(fd, t) > 2 && chance(0.45)) {
+            g.pathway = chance(0.55) ? 'visitor' : 'not_ready';
+            g.pathway_at = at(addDays(fd, Math.min(2, daysBetween(fd, t))), 18);
           }
           if (g.gt_completed_at && chance(0.55)) g.community_joined_at = clampDay(addDays(g.gt_completed_at, 10 + Math.floor(r() * 25)));
         }

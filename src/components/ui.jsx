@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTilt, CountUp } from './motion.jsx';
 import { LuX, LuArrowUpRight, LuArrowDownRight } from 'react-icons/lu';
 import { cls, initials } from '../lib/format.js';
-import { STAGES, stageIndex, followupStatus, daysOverdue, followupDue, parseDay } from '../lib/journey.js';
+import { STAGES, stageIndex, pathwayOf, followupStatus, daysOverdue, followupDue, parseDay } from '../lib/journey.js';
 
 export function Button({ variant = 'default', size, icon: Icon, children, className, ...p }) {
   return (
@@ -59,10 +59,11 @@ export function FollowBadge({ g, settings }) {
 
 export function StageDots({ g, labels }) {
   const idx = stageIndex(g);
+  const pw = pathwayOf(g);
   return (
-    <div className="dots" title={STAGES[idx].label}>
-      {STAGES.map((s, i) => <span key={s.key} className={cls('dot', i <= idx && 'on', i === idx && 'cur')} />)}
-      {labels && <span className="dots-l">{STAGES[idx].short}</span>}
+    <div className={cls('dots', pw && 'paused')} title={pw ? `${STAGES[idx].label} · ${pw.label}` : STAGES[idx].label}>
+      {STAGES.map((s, i) => <span key={s.key} className={cls('dot', i <= idx && 'on', i === idx && !pw && 'cur', pw && i > idx && 'off')} />)}
+      {labels && <span className="dots-l">{pw ? pw.label : STAGES[idx].short}</span>}
     </div>
   );
 }

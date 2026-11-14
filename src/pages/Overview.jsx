@@ -10,7 +10,7 @@ import { WeeklyBars, Funnel, HBars, Ring } from '../components/charts.jsx';
 import { CountUp, useTilt } from '../components/motion.jsx';
 import { fetchDigest } from '../lib/ai.js';
 import {
-  STAGES, PERIODS, periodRange, previousRange, inRange, today, addDays, weekStart, followupStatus, dayOf, fullName, parseDay,
+  STAGES, PATHWAYS, PERIODS, periodRange, previousRange, inRange, today, addDays, weekStart, followupStatus, dayOf, fullName, parseDay,
 } from '../lib/journey.js';
 import { fmtDateLong, fmtNum, pct, timeAgo } from '../lib/format.js';
 
@@ -46,6 +46,11 @@ export default function Overview({ openGuest }) {
     const reachable = cohort.filter((g) => followupStatus(g, settings, t) !== 'due');
     const overdueNow = guests.filter((g) => followupStatus(g, settings, t) === 'overdue' && g.first_visit >= addDays(t, -60));
     const during = (field) => guests.filter((g) => inRange(dayOf(g[field]), r)).length;
+    const reachedCohort = cohort.filter((g) => g.followed_up_at || g.pathway);
+    const split = [
+      { key: 'full', label: 'Continuing the journey', value: reachedCohort.filter((g) => !g.pathway).length },
+      ...PATHWAYS.map((x) => ({ key: x.key, label: x.label, value: reachedCohort.filter((g) => g.pathway === x.key).length })),
+    ];
     const funnel = STAGES.map((s) => ({ key: s.key, label: s.label, value: s.key === 'new' ? cohort.length : cohort.filter((g) => g[s.field]).length }));
     // last 12 church weeks
     const start = addDays(weekStart(t), -77);
@@ -65,7 +70,7 @@ export default function Overview({ openGuest }) {
       assigned: guests.filter((g) => g.assigned_to === p.id && !g.followed_up_at && g.first_visit >= addDays(t, -60)).length,
     })).sort((a, b) => b.calls - a.calls);
     return {
-      cohort, prevCohort, reachable, overdueNow, funnel, weeks, team,
+      cohort, prevCohort, reachable, overdueNow, funnel, split, weeks, team,
       heard: tally((g) => g.heard_via).slice(0, 6),
       ages: ageOrder.filter((a) => ages[a]).map((a) => [a, ages[a]]),
       join: ['Yes', 'Maybe', 'No'].map((k) => [k, cohort.filter((g) => g.would_join === k).length]),
@@ -126,6 +131,7 @@ export default function Overview({ openGuest }) {
         </Card>
         <Card title="Discipleship journey" sub={`Guests who first came ${periodLabel === 'all time' ? 'ever' : periodLabel}`}>
           <Funnel steps={m.funnel} onPick={(stage) => go('guests', { period, stage })} />
+          <PathwaySplit split={m.split} onPick={(stage) => go('guests', { period, stage })} />
         </Card>
       </div>
 
@@ -195,5 +201,27 @@ function Hero({ me, guests, settings }) {
         </div>
       </div>
     </section>
+  );
+}
+
+/** Of the guests reached: how many are continuing vs stopped after the welcome call. */
+function PathwaySplit({ split, onPick }) {
+  const total = split.reduce((a, x) => a + x.value, 0);
+  if (!total) return null;
+  const colors = { full: 'var(--navy-700)', visitor: 'var(--gold-500)', not_ready: '#C9B98F' };
+  return (
+    <div className="pathway-split">
+      <h4>After the welcome call</h4>
+      <div className="ps-bar" role="img" aria-label={split.map((x) => `${x.label}: ${x.value}`).join(', ')}>
+        {split.filter((x) => x.value).map((x) => <span key={x.key} className={`ps-${x.key}`} style={{ width: `${(x.value / total) * 100}%` }} title={`${x.label}: ${x.value}`} />)}
+      </div>
+      <div className="ps-legend">
+        {split.map((x) => (
+          <button key={x.key} type="button" onClick={() => onPick(x.key === 'full' ? 'followed_up' : x.key)}>
+            <i style={{ background: colors[x.key] }} />{x.label} <b>{x.value}</b> <span className="muted">({Math.round((x.value / total) * 100)}%)</span>
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }

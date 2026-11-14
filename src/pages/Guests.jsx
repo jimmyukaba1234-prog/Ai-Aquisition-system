@@ -3,7 +3,7 @@ import { LuDownload, LuSearch, LuUsers, LuX, LuUserCog } from 'react-icons/lu';
 import { useStore, can } from '../store.jsx';
 import { go } from '../App.jsx';
 import { Avatar, Badge, Button, Empty, FollowBadge, Segmented, StageDots } from '../components/ui.jsx';
-import { PERIODS, STAGES, periodRange, inRange, followupStatus, fullName, reached, stageOf, dayOf } from '../lib/journey.js';
+import { PERIODS, STAGES, PATHWAYS, journeyLabel, periodRange, inRange, followupStatus, fullName, reached, dayOf } from '../lib/journey.js';
 import { displayPhone, downloadCsv, fmtDate, fmtNum } from '../lib/format.js';
 
 const FU = [{ key: '', label: 'All' }, { key: 'overdue', label: 'Overdue' }, { key: 'due', label: 'Due' }, { key: 'done', label: 'Followed up' }];
@@ -35,7 +35,7 @@ export default function Guests({ params, openGuest }) {
     const needle = q.trim().toLowerCase();
     const digits = needle.replace(/\D/g, '');
     return inPeriod.filter((g) => {
-      if (stage && !reached(g, stage)) return false;
+      if (stage && (PATHWAYS.some((x) => x.key === stage) ? g.pathway !== stage : !reached(g, stage))) return false;
       if (fu && followupStatus(g, settings) !== fu) return false;
       if (who === 'none' ? g.assigned_to : who && g.assigned_to !== who) return false;
       if (!needle) return true;
@@ -44,7 +44,10 @@ export default function Guests({ params, openGuest }) {
     });
   }, [inPeriod, stage, fu, who, q, settings]);
 
-  const stageCounts = useMemo(() => Object.fromEntries(STAGES.map((s) => [s.key, inPeriod.filter((g) => reached(g, s.key)).length])), [inPeriod]);
+  const stageCounts = useMemo(() => Object.fromEntries([
+    ...STAGES.map((s) => [s.key, inPeriod.filter((g) => reached(g, s.key)).length]),
+    ...PATHWAYS.map((x) => [x.key, inPeriod.filter((g) => g.pathway === x.key).length]),
+  ]), [inPeriod]);
   const fuCounts = useMemo(() => { const c = { overdue: 0, due: 0, done: 0 }; inPeriod.forEach((g) => { c[followupStatus(g, settings)]++; }); return c; }, [inPeriod, settings]);
 
   const toggle = (id) => setSel((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
@@ -55,7 +58,7 @@ export default function Guests({ params, openGuest }) {
     const list = sel.size ? rows.filter((g) => sel.has(g.id)) : rows;
     downloadCsv(`guests-${period}-${new Date().toISOString().slice(0, 10)}.csv`, [
       ['First visit', 'Surname', 'Other names', 'Phone', 'Email', 'Gender', 'Age', 'Area', 'Occupation', 'Would join', 'Stage', 'Followed up', 'GT started', 'GT completed', 'Department', 'Community', 'Assigned to'],
-      ...list.map((g) => [g.first_visit, g.surname, g.other_names, displayPhone(g.phone), g.email, g.gender, g.age_range, g.area || g.town, g.occupation, g.would_join, stageOf(g).label, dayOf(g.followed_up_at), g.gt_started_at, g.gt_completed_at, g.department, g.community_joined_at, name(g.assigned_to)]),
+      ...list.map((g) => [g.first_visit, g.surname, g.other_names, displayPhone(g.phone), g.email, g.gender, g.age_range, g.area || g.town, g.occupation, g.would_join, journeyLabel(g), dayOf(g.followed_up_at), g.gt_started_at, g.gt_completed_at, g.department, g.community_joined_at, name(g.assigned_to)]),
     ]);
   }
 
@@ -76,6 +79,8 @@ export default function Guests({ params, openGuest }) {
           <div className="chips" aria-label="Journey stage">
             <button className={!stage ? 'chip on' : 'chip'} onClick={() => setStage('')}>Everyone <span>{fmtNum(inPeriod.length)}</span></button>
             {STAGES.slice(1).map((s) => <button key={s.key} className={stage === s.key ? 'chip on' : 'chip'} onClick={() => setStage(stage === s.key ? '' : s.key)}>{s.short} <span>{fmtNum(stageCounts[s.key])}</span></button>)}
+            <span className="chips-sep" aria-hidden />
+            {PATHWAYS.map((x) => <button key={x.key} className={stage === x.key ? 'chip on' : 'chip'} title={x.hint} onClick={() => setStage(stage === x.key ? '' : x.key)}>{x.label} <span>{fmtNum(stageCounts[x.key])}</span></button>)}
           </div>
         </div>
         <div className="filters-row">

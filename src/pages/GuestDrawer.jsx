@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  LuPhone, LuMessageCircle, LuMail, LuPencil, LuTrash2, LuSparkles, LuCheck, LuUndo2, LuMapPin, LuBriefcase, LuHeart, LuHand, LuCalendar,
+  LuPhone, LuMessageCircle, LuMail, LuPencil, LuTrash2, LuSparkles, LuCheck, LuUndo2, LuMapPin, LuBriefcase, LuHeart, LuHand, LuCalendar, LuPause, LuPlay,
 } from 'react-icons/lu';
 import { useStore, can } from '../store.jsx';
 import { Avatar, Badge, Button, Confirm, Drawer, FollowBadge, Segmented } from '../components/ui.jsx';
 import GuestForm from './GuestForm.jsx';
 import { fetchTalkingPoints } from '../lib/ai.js';
-import { STAGES, OUTCOMES, CHANNELS, today, fullName, dayOf, daysBetween, followupDue } from '../lib/journey.js';
+import { STAGES, PATHWAYS, pathwayOf, OUTCOMES, CHANNELS, today, fullName, dayOf, daysBetween, followupDue } from '../lib/journey.js';
 import { displayPhone, fmtDate, timeAgo, waLink, cls } from '../lib/format.js';
 
 export default function GuestDrawer({ id, onClose }) {
@@ -47,6 +47,7 @@ function GuestDetail({ g, onClose }) {
           <h2 className="serif">{fullName(g)}</h2>
           <div className="gd-meta">
             <FollowBadge g={g} settings={settings} />
+            {pathwayOf(g) && <Badge tone="mute" dot={false}>{pathwayOf(g).label}</Badge>}
             {g.would_join && <Badge tone={g.would_join === 'Yes' ? 'good' : 'info'} dot={false}>Would join: {g.would_join}</Badge>}
             <span>First visit {fmtDate(g.first_visit, { year: true })}{g.visit_count > 1 ? ` · ${g.visit_count} visits` : ''}</span>
           </div>
@@ -168,14 +169,23 @@ function Journey({ g, canEdit, departments }) {
     await updateGuest(g.id, patch, `${s.label}: cleared`);
   }
 
+  async function setPathway(key) {
+    const label = PATHWAYS.find((x) => x.key === key)?.label;
+    await updateGuest(g.id, { pathway: key, pathway_at: key ? new Date().toISOString() : null }, key ? `Marked as ${label}` : 'Back on the full journey');
+  }
+  const pw = pathwayOf(g);
+  // The choice only applies before Greatness Track starts.
+  const canChoose = canEdit && !g.gt_started_at;
+
   return (
     <ol className="journey">
       {STAGES.map((s, i) => {
         const v = g[s.field];
         const done = !!v;
         const prevDone = i === 0 || !!g[STAGES[i - 1].field];
-        return (
-          <li key={s.key} className={cls('j-step', done && 'done', !done && prevDone && 'next')}>
+        const skipped = !!pw && !done && i >= 2;
+        const step = (
+          <li key={s.key} className={cls('j-step', done && 'done', !done && prevDone && !skipped && 'next', skipped && 'skipped')}>
             <span className="j-dot">{done ? <LuCheck aria-hidden /> : i + 1}</span>
             <div className="j-body">
               <div className="j-top">
@@ -186,11 +196,13 @@ function Journey({ g, canEdit, departments }) {
                     {i > 0 && <em>{daysBetween(g.first_visit, dayOf(v))} days after first visit</em>}
                     {i > 0 && canEdit && <button className="icon-btn sm" title="Undo" aria-label={`Undo ${s.label}`} onClick={() => undo(s)}><LuUndo2 /></button>}
                   </span>
+                ) : skipped ? (
+                  <span className="j-skip">Not needed</span>
                 ) : canEdit && i > 0 && openKey !== s.key && (
                   <Button size="sm" variant={prevDone ? 'primary' : 'default'} onClick={() => { setOpenKey(s.key); setDate(today()); }}>Mark done</Button>
                 )}
               </div>
-              {openKey === s.key && (
+              {openKey === s.key && !skipped && (
                 <div className="j-form">
                   <label>Date <input type="date" value={date} max={today()} min={g.first_visit} onChange={(e) => setDate(e.target.value)} /></label>
                   {s.key === 'department' && (
@@ -205,6 +217,36 @@ function Journey({ g, canEdit, departments }) {
             </div>
           </li>
         );
+        if (s.key !== 'followed_up') return step;
+        // After "Followed up": the option to stop here.
+        const choice = pw ? (
+          <li key="pathway" className="j-step j-pathway on">
+            <span className="j-dot"><LuPause aria-hidden /></span>
+            <div className="j-body">
+              <div className="j-top">
+                <b>{pw.label}</b>
+                <span className="j-date">
+                  {g.pathway_at && fmtDate(dayOf(g.pathway_at), { year: true })}
+                  {canEdit && <Button size="sm" variant="ghost" icon={LuPlay} onClick={() => setPathway(null)}>Continue journey</Button>}
+                </span>
+              </div>
+              <p className="j-note">{pw.hint}. The Greatness Track steps are set aside, so they won’t show as pending or overdue.</p>
+            </div>
+          </li>
+        ) : canChoose ? (
+          <li key="pathway" className="j-step j-pathway">
+            <span className="j-dot"><LuPause aria-hidden /></span>
+            <div className="j-body">
+              <div className="j-top">
+                <b className="j-ask">Not continuing for now?</b>
+                <span className="j-opts">
+                  {PATHWAYS.map((x) => <Button key={x.key} size="sm" title={x.hint} onClick={() => setPathway(x.key)}>{x.label}</Button>)}
+                </span>
+              </div>
+            </div>
+          </li>
+        ) : null;
+        return [step, choice];
       })}
     </ol>
   );

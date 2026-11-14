@@ -9,6 +9,15 @@ export const STAGES = [
   { key: 'community', label: 'Joined Greatness Community', short: 'Community', field: 'community_joined_at' },
 ];
 
+/** Guests who stop after the welcome call. Setting one sets aside the Greatness Track steps; it can be undone any time. */
+export const PATHWAYS = [
+  { key: 'visitor', label: 'Just visiting', hint: 'Visiting from another church, city or country' },
+  { key: 'not_ready', label: 'Not ready yet', hint: 'Glad to be called, not ready for the next steps' },
+];
+export const pathwayOf = (g) => PATHWAYS.find((p) => p.key === g?.pathway) || null;
+/** Stage label for lists and exports, e.g. "Followed up · Just visiting". */
+export const journeyLabel = (g) => { const p = pathwayOf(g); const s = stageOf(g).label; return p ? `${s} · ${p.label}` : s; };
+
 export const OUTCOMES = ['Reached', 'No answer', 'Call back later', 'Wrong number', 'Not interested'];
 export const CHANNELS = ['Call', 'WhatsApp', 'SMS', 'Visit'];
 
@@ -100,13 +109,13 @@ export function followupStatus(g, settings, t = today()) {
 export const daysOverdue = (g, settings, t = today()) => Math.max(0, daysBetween(followupDue(g, settings), t));
 
 export function isStalled(g, settings, t = today()) {
-  if (!g.gt_started_at || g.gt_completed_at) return false;
+  if (g.pathway || !g.gt_started_at || g.gt_completed_at) return false;
   return daysBetween(g.gt_started_at, t) > (settings?.gt_stall_weeks ?? 8) * 7;
 }
 
 /** Reached 3 weeks to 4 months ago and still hasn't started Greatness Track: time to invite them. */
 export const readyForGT = (g, t = today()) => {
-  if (!g.followed_up_at || g.gt_started_at) return false;
+  if (g.pathway || !g.followed_up_at || g.gt_started_at) return false;
   const d = daysBetween(dayOf(g.followed_up_at), t);
   return d > 21 && d <= 120;
 };

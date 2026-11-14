@@ -3,7 +3,7 @@ import { LuX, LuPlus, LuSparkles, LuDatabase, LuTrash2, LuDownload } from 'react
 import { useStore, can } from '../store.jsx';
 import { Button, Card, Confirm, Field } from '../components/ui.jsx';
 import { downloadCsv, displayPhone } from '../lib/format.js';
-import { stageOf, dayOf } from '../lib/journey.js';
+import { journeyLabel, dayOf } from '../lib/journey.js';
 
 export default function Settings() {
   const { data, updateSettings, loadDemo, clearDemo, live } = useStore();
@@ -21,7 +21,7 @@ export default function Settings() {
   function exportAll() {
     downloadCsv(`all-guests-${new Date().toISOString().slice(0, 10)}.csv`, [
       ['First visit', 'Visits', 'Surname', 'Other names', 'Phone', 'Email', 'Gender', 'Age', 'Status', 'Town', 'LGA', 'Area', 'Bus stop', 'House no', 'Street/Estate', 'Sector', 'Occupation', 'Interests', 'Would join', 'Needs', 'Heard via', 'Stage', 'Followed up', 'GT started', 'GT completed', 'Department', 'Department joined', 'Community joined'],
-      ...guests.map((g) => [g.first_visit, g.visit_count, g.surname, g.other_names, displayPhone(g.phone), g.email, g.gender, g.age_range, g.marital_status, g.town, g.lga, g.area, g.bus_stop, g.house_no, g.street, g.sector, g.occupation, (g.interests || []).join('; '), g.would_join, g.needs, (g.heard_via || []).join('; '), stageOf(g).label, dayOf(g.followed_up_at), g.gt_started_at, g.gt_completed_at, g.department, g.department_joined_at, g.community_joined_at]),
+      ...guests.map((g) => [g.first_visit, g.visit_count, g.surname, g.other_names, displayPhone(g.phone), g.email, g.gender, g.age_range, g.marital_status, g.town, g.lga, g.area, g.bus_stop, g.house_no, g.street, g.sector, g.occupation, (g.interests || []).join('; '), g.would_join, g.needs, (g.heard_via || []).join('; '), journeyLabel(g), dayOf(g.followed_up_at), g.gt_started_at, g.gt_completed_at, g.department, g.department_joined_at, g.community_joined_at]),
     ]);
   }
 

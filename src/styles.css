@@ -602,3 +602,30 @@ body { background: radial-gradient(1200px 600px at 100% -10%, #EFE8D6 0%, transp
 .welcome-body b { color: #F3D98E; font-weight: 800; }
 .welcome-copy { max-width: 520px; }
 @media (max-width: 900px) { .login-art { padding: 26px 24px 30px; min-height: 380px; } .login-brand img { width: 128px; } }
+
+/* Pathway: "Just visiting" / "Not ready yet" (stops the journey after the welcome call) */
+.j-pathway .j-dot { background: #fff; color: var(--ink-3); box-shadow: 0 0 0 1px var(--line); border-style: dashed; }
+.j-pathway .j-dot svg { width: 13px; height: 13px; }
+.j-pathway.on .j-dot { background: var(--gold-50); color: var(--gold-700); box-shadow: 0 0 0 2px var(--gold-500); }
+.j-pathway.on .j-top b { color: var(--gold-700); }
+.j-ask { color: var(--ink-3) !important; font-weight: 600 !important; font-size: 13px !important; }
+.j-opts { display: inline-flex; gap: 8px; flex-wrap: wrap; }
+.j-note { margin: 6px 0 0; font-size: 12.5px; color: var(--ink-3); line-height: 1.45; }
+.j-step.skipped { opacity: .5; }
+.j-step.skipped .j-top b { text-decoration: line-through; text-decoration-color: rgba(0,0,0,.25); }
+.j-skip { font-size: 12px; font-weight: 700; color: var(--ink-3); background: #F2F0EA; padding: 3px 9px; border-radius: 999px; }
+.dots.paused .dot.off { background: transparent; box-shadow: inset 0 0 0 1px #CFC9BA; }
+.dots.paused .dots-l { color: var(--gold-700); }
+.pathway-split { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line-2); }
+.pathway-split h4 { margin: 0 0 10px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+.ps-bar { display: flex; height: 12px; border-radius: 999px; overflow: hidden; gap: 2px; background: #F2F0EA; }
+.ps-bar span { display: block; height: 100%; }
+.ps-bar .ps-full { background: var(--navy-700); border-radius: 999px 0 0 999px; }
+.ps-bar .ps-visitor { background: var(--gold-500); }
+.ps-bar .ps-not_ready { background: #C9B98F; border-radius: 0 999px 999px 0; }
+.ps-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; font-size: 13px; }
+.ps-legend button { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; color: var(--ink-2); }
+.ps-legend button:hover { color: var(--navy-800); }
+.ps-legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.ps-legend b { color: var(--ink); }
+.chips-sep { width: 1px; align-self: stretch; background: var(--line); margin: 4px 4px; }
