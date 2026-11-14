@@ -4,6 +4,8 @@ Every Sunday, new guests fill in the **Guest Information Card**. This app makes 
 
 ![Overview](docs/overview.png)
 
+![Sign in](docs/login.png)
+
 ## What it does
 
 | | |
@@ -75,7 +77,7 @@ The `/api/insights` function runs on Vercel (`vercel dev` locally).
 
 ## Changing things
 - **Follow-up window, Greatness Track "stalled" weeks, departments:** change these in the app under **Settings** (admin).
-- **Logo:** replace `public/logo.svg` with the church logo (same file name).
+- **Logo and photos:** `public/logo-light.png`, `public/logo-dark.png`, `public/emblem-*.png` and the welcome photo `public/welcome.jpg`. Replace them with the same file names.
 - **New card fields:** add a column in `supabase/schema.sql`, a matcher in `FIELDS` in `src/lib/excel.js`, and an input in `src/pages/GuestForm.jsx`.
 
 ## Roadmap

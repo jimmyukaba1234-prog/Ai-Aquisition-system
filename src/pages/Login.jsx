@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { LuArrowRight, LuSparkles, LuPhoneCall, LuGraduationCap } from 'react-icons/lu';
 import { useStore } from '../store.jsx';
 import { Button, Field } from '../components/ui.jsx';
-import { ElevationPath } from '../components/motion.jsx';
 
 export default function Login() {
   const { signIn, signUp, resetPassword, live } = useStore();
@@ -29,12 +28,12 @@ export default function Login() {
   return (
     <div className="login">
       <section className="login-art">
-        <div className="login-glow" />
+        <div className="login-photo" aria-hidden />
         <div className="login-brand"><img src="/logo-light.png" alt="The Elevation Church, Greater Lekki" /></div>
         <div className="login-copy">
           <p className="eyebrow">Guest Journey</p>
-          <h1 className="serif">Every first-timer, known by name and followed with care.</h1>
-          <div className="login-path"><ElevationPath counts={null} compact /></div>
+          <h1 className="serif">We’re so glad <em>you’re here.</em></h1>
+          <p className="login-lead">Every first-timer, known by name and followed with care, from their first Sunday to the Greatness Community.</p>
           <ul>
             <li><LuPhoneCall aria-hidden /> Every new guest called by Wednesday</li>
             <li><LuGraduationCap aria-hidden /> Track each step from first visit to Greatness Community</li>

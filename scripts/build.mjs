@@ -36,6 +36,7 @@ const options = {
   target: ['es2020'],
   jsx: 'automatic',
   loader: { '.js': 'jsx' },
+  external: ['/*.jpg', '/*.png', '/*.svg', '/*.webp'], // images in public/ are served as-is
   nodePaths: process.env.NODE_PATH ? process.env.NODE_PATH.split(':') : [],
   define: {
     'process.env.NODE_ENV': JSON.stringify(watch ? 'development' : 'production'),

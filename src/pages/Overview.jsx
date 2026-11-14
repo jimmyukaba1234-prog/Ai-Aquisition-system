@@ -7,7 +7,7 @@ import { useStore } from '../store.jsx';
 import { go } from '../App.jsx';
 import { Card, Stat, Segmented, Avatar, StageDots, FollowBadge } from '../components/ui.jsx';
 import { WeeklyBars, Funnel, HBars, Ring } from '../components/charts.jsx';
-import { ElevationPath, CountUp, useTilt } from '../components/motion.jsx';
+import { CountUp, useTilt } from '../components/motion.jsx';
 import { fetchDigest } from '../lib/ai.js';
 import {
   STAGES, PERIODS, periodRange, previousRange, inRange, today, addDays, weekStart, followupStatus, dayOf, fullName, parseDay,
@@ -79,7 +79,7 @@ export default function Overview({ openGuest }) {
 
   return (
     <div className="ov">
-      <Hero me={me} guests={guests} settings={settings} overdue={m.overdueNow.length} />
+      <Hero me={me} guests={guests} />
 
       <div className="ov-head">
         <div><p className="eyebrow">Insights</p><h2 className="serif ov-title">How our guests are doing</h2></div>
@@ -174,30 +174,22 @@ export default function Overview({ openGuest }) {
   );
 }
 
-function Hero({ me, guests, settings, overdue }) {
-  const tilt = useTilt(4);
-  const counts = STAGES.map((st) => (st.key === 'new' ? guests.length : guests.filter((g) => g[st.field]).length));
+function Hero({ me, guests }) {
+  const tilt = useTilt(3);
   const wk = periodRange('this_week');
   const thisWeek = guests.filter((g) => inRange(g.first_visit, wk)).length;
   return (
-    <section className="hero" ref={tilt}>
-      <div className="hero-bg" aria-hidden>
-        <span className="orb o1" /><span className="orb o2" /><span className="ring r1" /><span className="ring r2" /><span className="hero-light" />
-      </div>
-      <div className="hero-in">
-        <div className="hero-copy">
-          <img src="/logo-light.png" alt="The Elevation Church, Greater Lekki" className="hero-logo" />
-          <p className="eyebrow">{fmtDateLong(today())}</p>
-          <h2 className="serif hero-h">{greeting()}, {(me.full_name || '').split(' ')[0] || 'friend'}.</h2>
-          <p className="hero-sub">Every first-timer is a story God is writing. This is where our <b><CountUp value={guests.length} /></b> guests are on their journey, from first Sunday to the Greatness Community.</p>
-          <div className="hero-chips">
-            <button onClick={() => go('guests', { period: 'this_week' })}><b><CountUp value={thisWeek} /></b> new this week</button>
-            <button className={overdue ? 'hot' : ''} onClick={() => go('followups', { tab: 'overdue' })}><b><CountUp value={overdue} /></b> awaiting a call</button>
-          </div>
-        </div>
-        <div className="hero-path">
-          <p className="hero-path-t">The Elevation Path</p>
-          <ElevationPath counts={counts} />
+    <section className="welcome" ref={tilt}>
+      <div className="welcome-photo" role="img" aria-label="Elevation Church welcome team greeting a first-time guest" />
+      <div className="welcome-shade" aria-hidden />
+      <div className="welcome-copy">
+        <p className="welcome-hi">{greeting()}, {(me.full_name || '').split(' ')[0] || 'friend'} · {fmtDateLong(today())}</p>
+        <h2 className="welcome-h"><span>Welcome to</span>The Elevation <em>Church</em></h2>
+        <p className="welcome-sub">We’re so glad you’re here!</p>
+        <p className="welcome-body">Whether it’s your first time or you’ve been with us before, you belong here. Let’s grow together in God’s grace.</p>
+        <div className="welcome-cta">
+          <button className="btn-gold" onClick={() => go('guests', { period: 'this_week' })}>Welcome, Friend! <LuArrowRight aria-hidden /></button>
+          <button className="welcome-chip" onClick={() => go('guests', { period: 'this_week' })}><b><CountUp value={thisWeek} /></b> first-timers this week</button>
         </div>
       </div>
     </section>
