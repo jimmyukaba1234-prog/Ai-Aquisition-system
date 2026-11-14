@@ -578,7 +578,7 @@ body { background: radial-gradient(1200px 600px at 100% -10%, #EFE8D6 0%, transp
 .login-art { background: #0A1630; isolation: isolate; }
 .login-photo { position: absolute; inset: 0; z-index: -1; background:
     linear-gradient(180deg, #0A1630 0%, rgba(10,22,48,.75) 11%, rgba(10,22,48,.05) 24%, rgba(10,22,48,0) 46%, rgba(10,22,48,.9) 70%, #0A1630 86%),
-    url('https://images.unsplash.com/photo-1614317354806-860a3bf79069?w=2000&q=82&auto=format&fit=crop') 38% 0 / cover no-repeat; animation: kenburns 26s ease-in-out infinite alternate; }
+    url('https://images.unsplash.com/photo-1614317354806-860a3bf79069?w=2000&q=82&auto=format&fit=crop') 38% 56px / cover no-repeat; animation: kenburns 26s ease-in-out infinite alternate; }
 .login-copy h1 em { font-style: normal; color: var(--gold-300); }
 .login-copy h1 { margin-bottom: 12px; }
 .login-lead { margin: 0 0 24px; color: #C9D2E6; font-size: 15.5px; line-height: 1.6; max-width: 460px; }
